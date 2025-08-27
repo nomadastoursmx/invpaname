@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            padding: 20px;
+            background: rgba(79, 172, 254, 0.1);
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .file-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-input-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: rgba(0, 242, 254, 0.05);
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #4facfe;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .inventory-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 8px;
+            text-align: left;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .inventory-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+
+        .inventory-table tr:hover {
+            background: rgba(79, 172, 254, 0.05);
+        }
+
+        .inventory-table tr.checked {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .custom-checkbox.checked {
+            background: #4caf50;
+            border-color: #4caf50;
+        }
+
+        .custom-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-height: 40px;
+            resize: vertical;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 0 20px 20px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .inventory-table th,
+            .inventory-table td {
+                padding: 8px 4px;
+                font-size: 14px;
+            }
+            
+            .filters {
+                justify-content: center;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .inventory-table {
+                font-size: 12px;
+            }
+            
+            .inventory-table th,
+            .inventory-table td {
+                padding: 6px 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Sistema de Inventario</h1>
+            <p>Gestiona tu inventario de manera eficiente</p>
+        </div>
+
+        <div class="controls">
+            <div class="file-input-container">
+                <div class="file-input">
+                    <input type="file" id="csvFile" accept=".csv" />
+                    <label for="csvFile" class="file-input-button">
+                        📁 Cargar archivo CSV
+                    </label>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="export-btn" onclick="exportProgress()">💾 Exportar Progreso</button>
+                    <button class="export-btn" onclick="downloadTemplate()" style="background: linear-gradient(135deg, #ff7b7b 0%, #ff6b6b 100%);">📄 Descargar Plantilla</button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar por código, descripción o nombre...">
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterItems('all')">Todos</button>
+                <button class="filter-btn" onclick="filterItems('checked')">Verificados</button>
+                <button class="filter-btn" onclick="filterItems('unchecked')">Pendientes</button>
+                <button class="filter-btn" onclick="filterItems('with-comments')">Con Comentarios</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalItems">0</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="checkedItems">0</div>
+                <div class="stat-label">Verificados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingItems">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="progressPercent">0%</div>
+                <div class="stat-label">Progreso</div>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableContainer">
+            <div class="no-data">
+                <h3>📋 Sin datos</h3>
+                <p>Carga un archivo CSV para comenzar</p>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #999;">
+                    Formato esperado: CODIGO, RIN, ESTADO, DESCRIPCION, NOMBRE_TIENDA, EXISTENCIAS, COMENTARIO
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let inventoryData = [];
+        let filteredData = [];
+        let currentFilter = 'all';
+
+        document.getElementById('csvFile').addEventListener('change', handleFileUpload);
+        document.getElementById('searchInput').addEventListener('input', handleSearch);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                parseCSV(csv);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                alert('El archivo CSV debe tener al menos una fila de encabezados y una fila de datos');
+                return;
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            inventoryData = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                if (values.length >= 6) {
+                    const item = {
+                        id: i,
+                        codigo: values[0] || '',
+                        rin: values[1] || '',
+                        estado: values[2] || '',
+                        descripcion: values[3] || '',
+                        nombreTienda: values[4] || '',
+                        existencias: values[5] || '',
+                        comentario: values[6] || '',
+                        checked: false,
+                        originalComentario: values[6] || ''
+                    };
+                    inventoryData.push(item);
+                }
+            }
+
+            filteredData = [...inventoryData];
+            renderTable();
+            updateStats();
+        }
+
+        function renderTable() {
+            const container = document.getElementById('tableContainer');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <h3>📋 ${inventoryData.length === 0 ? 'Sin datos' : 'No hay resultados'}</h3>
+                        <p>${inventoryData.length === 0 ? 'Carga un archivo CSV para comenzar' : 'Intenta con otros filtros o términos de búsqueda'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const table = `
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">✓</th>
+                            <th>Código</th>
+                            <th>RIN</th>
+                            <th>Estado</th>
+                            <th>Descripción</th>
+                            <th>Tienda</th>
+                            <th>Existencias</th>
+                            <th style="min-width: 200px;">Comentarios</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredData.map(item => `
+                            <tr class="${item.checked ? 'checked' : ''}">
+                                <td class="checkbox-container">
+                                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" 
+                                         onclick="toggleCheck(${item.id})"></div>
+                                </td>
+                                <td><strong>${item.codigo}</strong></td>
+                                <td>${item.rin}</td>
+                                <td>${item.estado}</td>
+                                <td>${item.descripcion}</td>
+                                <td>${item.nombreTienda}</td>
+                                <td><strong>${item.existencias}</strong></td>
+                                <td>
+                                    <textarea class="comment-input" 
+                                              placeholder="Agregar comentario..."
+                                              onchange="updateComment(${item.id}, this.value)"
+                                              rows="2">${item.comentario}</textarea>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = table;
+        }
+
+        function toggleCheck(itemId) {
+            const item = inventoryData.find(i => i.id === itemId);
+            if (item) {
+                item.checked = !item.checked;
+                renderTable();
+                updateStats();
+            }
+        }
+
+        function updateComment(itemId, comment) {
+            const item = inventoryData.find(i => i.id === itemId);
+            if (item) {
+                item.comentario = comment;
+            }
+        }
+
+        function handleSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredData = inventoryData.filter(item => 
+                item.codigo.toLowerCase().includes(searchTerm) ||
+                item.descripcion.toLowerCase().includes(searchTerm) ||
+                item.nombreTienda.toLowerCase().includes(searchTerm) ||
+                item.rin.toLowerCase().includes(searchTerm)
+            );
+
+            applyCurrentFilter();
+        }
+
+        function filterItems(filter) {
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            currentFilter = filter;
+            applyCurrentFilter();
+        }
+
+        function applyCurrentFilter() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let baseData = inventoryData.filter(item => 
+                item.codigo.toLowerCase().includes(searchTerm) ||
+                item.descripcion.toLowerCase().includes(searchTerm) ||
+                item.nombreTienda.toLowerCase().includes(searchTerm) ||
+                item.rin.toLowerCase().includes(searchTerm)
+            );
+
+            switch(currentFilter) {
+                case 'checked':
+                    filteredData = baseData.filter(item => item.checked);
+                    break;
+                case 'unchecked':
+                    filteredData = baseData.filter(item => !item.checked);
+                    break;
+                case 'with-comments':
+                    filteredData = baseData.filter(item => item.comentario && item.comentario.trim() !== '');
+                    break;
+                default:
+                    filteredData = baseData;
+            }
+
+            renderTable();
+        }
+
+        function updateStats() {
+            const total = inventoryData.length;
+            const checked = inventoryData.filter(item => item.checked).length;
+            const pending = total - checked;
+            const progress = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+            document.getElementById('totalItems').textContent = total;
+            document.getElementById('checkedItems').textContent = checked;
+            document.getElementById('pendingItems').textContent = pending;
+            document.getElementById('progressPercent').textContent = progress + '%';
+        }
+
+        function exportProgress() {
+            if (inventoryData.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            const headers = ['CODIGO', 'RIN', 'ESTADO', 'DESCRIPCION', 'NOMBRE_TIENDA', 'EXISTENCIAS', 'COMENTARIO', 'VERIFICADO'];
+            const csvContent = [
+                headers.join(','),
+                ...inventoryData.map(item => [
+                    item.codigo,
+                    item.rin,
+                    item.estado,
+                    item.descripcion,
+                    item.nombreTienda,
+                    item.existencias,
+                    `"${item.comentario.replace(/"/g, '""')}"`,
+                    item.checked ? 'SI' : 'NO'
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `inventario_progreso_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadTemplate() {
+            const template = `CODIGO,RIN,ESTADO,DESCRIPCION,NOMBRE_TIENDA,EXISTENCIAS,COMENTARIO
+P001,12345,ACTIVO,Producto de ejemplo 1,Tienda Principal,10,
+P002,12346,ACTIVO,Producto de ejemplo 2,Tienda Principal,5,Revisar stock
+P003,12347,INACTIVO,Producto de ejemplo 3,Sucursal Norte,0,Descontinuado`;
+
+            const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'plantilla_inventario.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize stats
+        updateStats();
+    </script>
+</body>
+</html>

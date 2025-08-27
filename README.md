@@ -1,2 +1,0 @@
-# invpaname
-inventario panamericana
