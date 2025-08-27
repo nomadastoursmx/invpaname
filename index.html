@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventario</title>
+    <title>Sistema de Inventario con Fotos</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -130,9 +130,31 @@
             color: white;
         }
 
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            border: 2px solid #4facfe;
+            background: white;
+            color: #4facfe;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .view-btn.active {
+            background: #4facfe;
+            color: white;
+        }
+
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 15px;
             padding: 20px;
             background: rgba(0, 242, 254, 0.05);
@@ -159,6 +181,7 @@
             margin-top: 5px;
         }
 
+        /* Tabla View */
         .inventory-table {
             width: 100%;
             border-collapse: collapse;
@@ -188,6 +211,196 @@
 
         .inventory-table tr.checked {
             background: rgba(76, 175, 80, 0.1);
+        }
+
+        /* Vista de Tarjetas */
+        .card-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card.checked {
+            border-color: #4caf50;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+        }
+
+        .card-header {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-checkbox {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-checkbox.checked {
+            background: #4caf50;
+            border-color: #4caf50;
+        }
+
+        .card-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .card-code {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-brand {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .card-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .image-placeholder {
+            color: #999;
+            font-size: 3em;
+        }
+
+        .photo-upload {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .photo-upload:hover {
+            transform: scale(1.1);
+            background: #3a8bfe;
+        }
+
+        .photo-input {
+            display: none;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-description {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .existencias {
+            background: rgba(76, 175, 80, 0.1) !important;
+        }
+
+        .estado {
+            background: rgba(255, 152, 0, 0.1) !important;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-height: 80px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 0 20px 20px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .checkbox-container {
@@ -222,33 +435,34 @@
             font-size: 14px;
         }
 
-        .comment-input {
+        .table-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .table-image img {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            min-height: 40px;
-            resize: vertical;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
         }
 
-        .comment-input:focus {
-            outline: none;
-            border-color: #4facfe;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.2em;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin: 0 20px 20px 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        .table-photo-btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
         }
 
         .export-btn {
@@ -268,9 +482,22 @@
             box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
         }
 
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5em;
+            .card-view {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .product-card {
+                margin: 0 5px;
             }
             
             .inventory-table th,
@@ -278,33 +505,14 @@
                 padding: 8px 4px;
                 font-size: 14px;
             }
-            
-            .filters {
-                justify-content: center;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .inventory-table {
-                font-size: 12px;
-            }
-            
-            .inventory-table th,
-            .inventory-table td {
-                padding: 6px 2px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📦 Sistema de Inventario</h1>
-            <p>Gestiona tu inventario de manera eficiente</p>
+            <h1>📷 Sistema de Inventario Visual</h1>
+            <p>Gestiona tu inventario con fotos y comentarios</p>
         </div>
 
         <div class="controls">
@@ -321,14 +529,20 @@
                 </div>
             </div>
 
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('cards')">🎴 Vista Tarjetas</button>
+                <button class="view-btn" onclick="switchView('table')">📊 Vista Tabla</button>
+            </div>
+
             <div class="search-container">
-                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar por código, descripción o nombre...">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar por código, descripción, marca o tienda...">
             </div>
 
             <div class="filters">
                 <button class="filter-btn active" onclick="filterItems('all')">Todos</button>
                 <button class="filter-btn" onclick="filterItems('checked')">Verificados</button>
                 <button class="filter-btn" onclick="filterItems('unchecked')">Pendientes</button>
+                <button class="filter-btn" onclick="filterItems('with-photos')">Con Fotos</button>
                 <button class="filter-btn" onclick="filterItems('with-comments')">Con Comentarios</button>
             </div>
         </div>
@@ -339,12 +553,16 @@
                 <div class="stat-label">Total Productos</div>
             </div>
             <div class="stat-card">
+                <div class="stat-number" id="totalPieces">0</div>
+                <div class="stat-label">Total Piezas</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-number" id="checkedItems">0</div>
                 <div class="stat-label">Verificados</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number" id="pendingItems">0</div>
-                <div class="stat-label">Pendientes</div>
+                <div class="stat-number" id="withPhotos">0</div>
+                <div class="stat-label">Con Fotos</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="progressPercent">0%</div>
@@ -352,12 +570,12 @@
             </div>
         </div>
 
-        <div class="table-container" id="tableContainer">
+        <div id="inventoryContainer">
             <div class="no-data">
                 <h3>📋 Sin datos</h3>
                 <p>Carga un archivo CSV para comenzar</p>
                 <p style="margin-top: 15px; font-size: 0.9em; color: #999;">
-                    Formato esperado: CODIGO, RIN, ESTADO, DESCRIPCION, NOMBRE_TIENDA, EXISTENCIAS, COMENTARIO
+                    Formato: CODIGO, DESCRIPCION, ESTADO, FOTO, MARCA, TIENDA, EXISTENCIAS, COMENTARIO
                 </p>
             </div>
         </div>
@@ -367,6 +585,7 @@
         let inventoryData = [];
         let filteredData = [];
         let currentFilter = 'all';
+        let currentView = 'cards';
 
         document.getElementById('csvFile').addEventListener('change', handleFileUpload);
         document.getElementById('searchInput').addEventListener('input', handleSearch);
@@ -390,35 +609,50 @@
                 return;
             }
 
-            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
             inventoryData = [];
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(',');
-                if (values.length >= 6) {
+                if (values.length >= 7) {
                     const item = {
                         id: i,
                         codigo: values[0] || '',
-                        rin: values[1] || '',
+                        descripcion: values[1] || '',
                         estado: values[2] || '',
-                        descripcion: values[3] || '',
-                        nombreTienda: values[4] || '',
-                        existencias: values[5] || '',
-                        comentario: values[6] || '',
+                        foto: values[3] || '',
+                        marca: values[4] || '',
+                        tienda: values[5] || '',
+                        existencias: values[6] || '',
+                        comentario: values[7] || '',
                         checked: false,
-                        originalComentario: values[6] || ''
+                        imageData: null
                     };
                     inventoryData.push(item);
                 }
             }
 
             filteredData = [...inventoryData];
-            renderTable();
+            renderView();
             updateStats();
         }
 
-        function renderTable() {
-            const container = document.getElementById('tableContainer');
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderView();
+        }
+
+        function renderView() {
+            if (currentView === 'cards') {
+                renderCards();
+            } else {
+                renderTable();
+            }
+        }
+
+        function renderCards() {
+            const container = document.getElementById('inventoryContainer');
             
             if (filteredData.length === 0) {
                 container.innerHTML = `
@@ -430,53 +664,155 @@
                 return;
             }
 
-            const table = `
-                <table class="inventory-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 60px;">✓</th>
-                            <th>Código</th>
-                            <th>RIN</th>
-                            <th>Estado</th>
-                            <th>Descripción</th>
-                            <th>Tienda</th>
-                            <th>Existencias</th>
-                            <th style="min-width: 200px;">Comentarios</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filteredData.map(item => `
-                            <tr class="${item.checked ? 'checked' : ''}">
-                                <td class="checkbox-container">
-                                    <div class="custom-checkbox ${item.checked ? 'checked' : ''}" 
-                                         onclick="toggleCheck(${item.id})"></div>
-                                </td>
-                                <td><strong>${item.codigo}</strong></td>
-                                <td>${item.rin}</td>
-                                <td>${item.estado}</td>
-                                <td>${item.descripcion}</td>
-                                <td>${item.nombreTienda}</td>
-                                <td><strong>${item.existencias}</strong></td>
-                                <td>
-                                    <textarea class="comment-input" 
-                                              placeholder="Agregar comentario..."
-                                              onchange="updateComment(${item.id}, this.value)"
-                                              rows="2">${item.comentario}</textarea>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+            const cardsHTML = `
+                <div class="card-view">
+                    ${filteredData.map(item => `
+                        <div class="product-card ${item.checked ? 'checked' : ''}">
+                            <div class="card-header">
+                                <div class="card-checkbox ${item.checked ? 'checked' : ''}" 
+                                     onclick="toggleCheck(${item.id})"></div>
+                                <div class="card-code">${item.codigo}</div>
+                                <div class="card-brand">${item.marca}</div>
+                            </div>
+                            
+                            <div class="card-image">
+                                ${item.imageData ? 
+                                    `<img src="${item.imageData}" alt="Producto ${item.codigo}">` :
+                                    `<div class="image-placeholder">📷</div>`
+                                }
+                                <button class="photo-upload" onclick="uploadPhoto(${item.id})">📷</button>
+                                <input type="file" class="photo-input" id="photo-${item.id}" 
+                                       accept="image/*" onchange="handlePhotoUpload(${item.id}, event)">
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="card-description">${item.descripcion}</div>
+                                
+                                <div class="card-details">
+                                    <div class="detail-item estado">
+                                        <div class="detail-label">Estado</div>
+                                        <div class="detail-value">${item.estado}</div>
+                                    </div>
+                                    <div class="detail-item existencias">
+                                        <div class="detail-label">Existencias</div>
+                                        <div class="detail-value">${item.existencias}</div>
+                                    </div>
+                                    <div class="detail-item" style="grid-column: span 2;">
+                                        <div class="detail-label">Tienda</div>
+                                        <div class="detail-value">${item.tienda}</div>
+                                    </div>
+                                </div>
+                                
+                                <textarea class="comment-input" 
+                                          placeholder="Agregar comentario o notas..."
+                                          onchange="updateComment(${item.id}, this.value)"
+                                          rows="3">${item.comentario}</textarea>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             `;
 
-            container.innerHTML = table;
+            container.innerHTML = cardsHTML;
+        }
+
+        function renderTable() {
+            const container = document.getElementById('inventoryContainer');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <h3>📋 ${inventoryData.length === 0 ? 'Sin datos' : 'No hay resultados'}</h3>
+                        <p>${inventoryData.length === 0 ? 'Carga un archivo CSV para comenzar' : 'Intenta con otros filtros o términos de búsqueda'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <div class="table-container">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">✓</th>
+                                <th>Código</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th style="width: 80px;">Foto</th>
+                                <th>Marca</th>
+                                <th>Tienda</th>
+                                <th>Existencias</th>
+                                <th style="min-width: 200px;">Comentarios</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredData.map(item => `
+                                <tr class="${item.checked ? 'checked' : ''}">
+                                    <td class="checkbox-container">
+                                        <div class="custom-checkbox ${item.checked ? 'checked' : ''}" 
+                                             onclick="toggleCheck(${item.id})"></div>
+                                    </td>
+                                    <td><strong>${item.codigo}</strong></td>
+                                    <td>${item.descripcion}</td>
+                                    <td>${item.estado}</td>
+                                    <td>
+                                        <div class="table-image">
+                                            ${item.imageData ? 
+                                                `<img src="${item.imageData}" alt="Producto">` :
+                                                `<span style="color: #999;">📷</span>`
+                                            }
+                                        </div>
+                                        <button class="table-photo-btn" onclick="uploadPhoto(${item.id})">📷</button>
+                                        <input type="file" class="photo-input" id="photo-table-${item.id}" 
+                                               accept="image/*" onchange="handlePhotoUpload(${item.id}, event)">
+                                    </td>
+                                    <td>${item.marca}</td>
+                                    <td>${item.tienda}</td>
+                                    <td><strong>${item.existencias}</strong></td>
+                                    <td>
+                                        <textarea class="comment-input" 
+                                                  placeholder="Agregar comentario..."
+                                                  onchange="updateComment(${item.id}, this.value)"
+                                                  rows="2">${item.comentario}</textarea>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        function uploadPhoto(itemId) {
+            const input = document.getElementById(`photo-${itemId}`) || document.getElementById(`photo-table-${itemId}`);
+            if (input) {
+                input.click();
+            }
+        }
+
+        function handlePhotoUpload(itemId, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const item = inventoryData.find(i => i.id === itemId);
+                if (item) {
+                    item.imageData = e.target.result;
+                    renderView();
+                    updateStats();
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         function toggleCheck(itemId) {
             const item = inventoryData.find(i => i.id === itemId);
             if (item) {
                 item.checked = !item.checked;
-                renderTable();
+                renderView();
                 updateStats();
             }
         }
@@ -494,15 +830,14 @@
             filteredData = inventoryData.filter(item => 
                 item.codigo.toLowerCase().includes(searchTerm) ||
                 item.descripcion.toLowerCase().includes(searchTerm) ||
-                item.nombreTienda.toLowerCase().includes(searchTerm) ||
-                item.rin.toLowerCase().includes(searchTerm)
+                item.marca.toLowerCase().includes(searchTerm) ||
+                item.tienda.toLowerCase().includes(searchTerm)
             );
 
             applyCurrentFilter();
         }
 
         function filterItems(filter) {
-            // Update filter buttons
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
@@ -516,8 +851,8 @@
             let baseData = inventoryData.filter(item => 
                 item.codigo.toLowerCase().includes(searchTerm) ||
                 item.descripcion.toLowerCase().includes(searchTerm) ||
-                item.nombreTienda.toLowerCase().includes(searchTerm) ||
-                item.rin.toLowerCase().includes(searchTerm)
+                item.marca.toLowerCase().includes(searchTerm) ||
+                item.tienda.toLowerCase().includes(searchTerm)
             );
 
             switch(currentFilter) {
@@ -527,6 +862,9 @@
                 case 'unchecked':
                     filteredData = baseData.filter(item => !item.checked);
                     break;
+                case 'with-photos':
+                    filteredData = baseData.filter(item => item.imageData);
+                    break;
                 case 'with-comments':
                     filteredData = baseData.filter(item => item.comentario && item.comentario.trim() !== '');
                     break;
@@ -534,18 +872,25 @@
                     filteredData = baseData;
             }
 
-            renderTable();
+            renderView();
         }
 
         function updateStats() {
             const total = inventoryData.length;
             const checked = inventoryData.filter(item => item.checked).length;
-            const pending = total - checked;
+            const withPhotos = inventoryData.filter(item => item.imageData).length;
             const progress = total > 0 ? Math.round((checked / total) * 100) : 0;
+            
+            // Calcular total de piezas
+            const totalPieces = inventoryData.reduce((sum, item) => {
+                const pieces = parseInt(item.existencias) || 0;
+                return sum + pieces;
+            }, 0);
 
             document.getElementById('totalItems').textContent = total;
+            document.getElementById('totalPieces').textContent = totalPieces.toLocaleString();
             document.getElementById('checkedItems').textContent = checked;
-            document.getElementById('pendingItems').textContent = pending;
+            document.getElementById('withPhotos').textContent = withPhotos;
             document.getElementById('progressPercent').textContent = progress + '%';
         }
 
@@ -555,18 +900,20 @@
                 return;
             }
 
-            const headers = ['CODIGO', 'RIN', 'ESTADO', 'DESCRIPCION', 'NOMBRE_TIENDA', 'EXISTENCIAS', 'COMENTARIO', 'VERIFICADO'];
+            const headers = ['CODIGO', 'DESCRIPCION', 'ESTADO', 'FOTO', 'MARCA', 'TIENDA', 'EXISTENCIAS', 'COMENTARIO', 'VERIFICADO', 'TIENE_FOTO'];
             const csvContent = [
                 headers.join(','),
                 ...inventoryData.map(item => [
                     item.codigo,
-                    item.rin,
+                    `"${item.descripcion.replace(/"/g, '""')}"`,
                     item.estado,
-                    item.descripcion,
-                    item.nombreTienda,
+                    item.foto,
+                    item.marca,
+                    item.tienda,
                     item.existencias,
                     `"${item.comentario.replace(/"/g, '""')}"`,
-                    item.checked ? 'SI' : 'NO'
+                    item.checked ? 'SI' : 'NO',
+                    item.imageData ? 'SI' : 'NO'
                 ].join(','))
             ].join('\n');
 
@@ -582,10 +929,11 @@
         }
 
         function downloadTemplate() {
-            const template = `CODIGO,RIN,ESTADO,DESCRIPCION,NOMBRE_TIENDA,EXISTENCIAS,COMENTARIO
-P001,12345,ACTIVO,Producto de ejemplo 1,Tienda Principal,10,
-P002,12346,ACTIVO,Producto de ejemplo 2,Tienda Principal,5,Revisar stock
-P003,12347,INACTIVO,Producto de ejemplo 3,Sucursal Norte,0,Descontinuado`;
+            const template = `CODIGO,DESCRIPCION,ESTADO,FOTO,MARCA,TIENDA,EXISTENCIAS,COMENTARIO
+P001,Smartphone Samsung Galaxy A54,ACTIVO,,Samsung,Tienda Central,15,
+P002,Auriculares Bluetooth Sony,ACTIVO,,Sony,Sucursal Norte,8,Revisar empaque
+P003,Cargador iPhone Original,DESCONTINUADO,,Apple,Tienda Central,0,Producto descontinuado
+P004,Funda Protectora Universal,ACTIVO,,Generic,Sucursal Sur,25,Stock completo`;
 
             const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
