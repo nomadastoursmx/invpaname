@@ -489,6 +489,17 @@
             font-size: 1.2em;
         }
 
+        .debug-info {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .card-view {
@@ -523,10 +534,21 @@
                         📁 Cargar archivo CSV
                     </label>
                 </div>
+                <div style="margin: 15px 0;">
+                    <input type="text" id="dropboxUrl" class="search-input" 
+                           placeholder="🔗 URL de carpeta Dropbox con fotos (opcional)"
+                           value="https://www.dropbox.com/scl/fo/ude0yqw8k8mwpq7402a4y/h?rlkey=or8tbfzt1tuk9l3zuvqqyn9hm&st=mvkuqbxu&dl=0">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Ejemplo: https://www.dropbox.com/scl/fo/xxxxxxx/xxxxxxx
+                    </small>
+                </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="export-btn" onclick="loadDropboxPhotos()">📷 Cargar Fotos desde Dropbox</button>
                     <button class="export-btn" onclick="exportProgress()">💾 Exportar Progreso</button>
                     <button class="export-btn" onclick="downloadTemplate()" style="background: linear-gradient(135deg, #ff7b7b 0%, #ff6b6b 100%);">📄 Descargar Plantilla</button>
+                    <button class="export-btn" onclick="clearCache()" style="background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);">🧹 Limpiar Cache</button>
                 </div>
+                <div id="debugInfo" class="debug-info" style="display: none;"></div>
             </div>
 
             <div class="view-toggle">
@@ -575,7 +597,8 @@
                 <h3>📋 Sin datos</h3>
                 <p>Carga un archivo CSV para comenzar</p>
                 <p style="margin-top: 15px; font-size: 0.9em; color: #999;">
-                    Formato: CODIGO, DESCRIPCION, ESTADO, FOTO, MARCA, TIENDA, EXISTENCIAS, COMENTARIO
+                    Formato: CODIGO, DESCRIPCION, ESTADO, FOTO, MARCA, TIENDA, EXISTENCIAS, COMENTARIO<br>
+                    💡 Tip: Puedes cargar fotos automáticamente desde Dropbox usando los códigos de productos
                 </p>
             </div>
         </div>
@@ -586,9 +609,272 @@
         let filteredData = [];
         let currentFilter = 'all';
         let currentView = 'cards';
+        let dropboxBaseUrl = '';
+        let imageCache = {}; // Cache para las imágenes
 
         document.getElementById('csvFile').addEventListener('change', handleFileUpload);
         document.getElementById('searchInput').addEventListener('input', handleSearch);
+
+        function debugLog(message) {
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            debugDiv.scrollTop = debugDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // Función para limpiar cache
+        function clearCache() {
+            imageCache = {};
+            debugLog('🧹 Cache limpiado');
+        }
+
+        function loadDropboxPhotos() {
+            const url = document.getElementById('dropboxUrl').value.trim();
+            if (!url) {
+                alert('Por favor ingresa la URL de la carpeta de Dropbox');
+                return;
+            }
+
+            if (inventoryData.length === 0) {
+                alert('Primero carga el archivo CSV con los productos');
+                return;
+            }
+
+            debugLog('🔄 Iniciando carga desde Dropbox: ' + url);
+
+            // Procesar la URL para obtener los parámetros necesarios
+            let baseUrl = '';
+            let rlkey = '';
+
+            if (url.includes('dropbox.com/scl/fo/')) {
+                // Nuevo formato: https://www.dropbox.com/scl/fo/ude0yqw8k8mwpq7402a4y/h?rlkey=or8tbfzt1tuk9l3zuvqqyn9hm&st=mvkuqbxu&dl=0
+                const urlParts = url.split('?')[0]; // Obtener la parte antes de los parámetros
+                const params = new URL(url).searchParams;
+                rlkey = params.get('rlkey');
+                
+                // Construir URL base
+                baseUrl = urlParts.replace('/h', '') + '/';
+                debugLog('📋 URL base procesada: ' + baseUrl);
+                debugLog('🔑 rlkey extraído: ' + rlkey);
+                
+            } else if (url.includes('dropbox.com/sh/')) {
+                // Formato antiguo
+                baseUrl = url.replace('dropbox.com/sh/', 'dropbox.com/sh/').replace('?dl=0', '');
+                if (!baseUrl.endsWith('/')) baseUrl += '/';
+                debugLog('📋 URL formato antiguo procesada: ' + baseUrl);
+            } else {
+                alert('Formato de URL no reconocido. Usar formato: https://www.dropbox.com/scl/fo/...');
+                return;
+            }
+
+            dropboxBaseUrl = baseUrl;
+            
+            // Cargar fotos para cada producto
+            let loadedCount = 0;
+            let successCount = 0;
+            let totalCount = inventoryData.length;
+            
+            const loadingMessage = document.createElement('div');
+            loadingMessage.id = 'loadingMessage';
+            loadingMessage.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                z-index: 1000; text-align: center; max-width: 400px;
+            `;
+            loadingMessage.innerHTML = `
+                <h3>📷 Cargando fotos...</h3>
+                <p>Progreso: <span id="photoProgress">0</span>/${totalCount}</p>
+                <p>Éxitos: <span id="photoSuccess">0</span></p>
+                <div style="width: 200px; height: 10px; background: #eee; border-radius: 5px; margin: 10px auto;">
+                    <div id="progressBar" style="width: 0%; height: 100%; background: #4facfe; border-radius: 5px; transition: width 0.3s ease;"></div>
+                </div>
+                <div id="currentItem" style="font-size: 12px; color: #666; margin-top: 10px;">Preparando...</div>
+            `;
+            document.body.appendChild(loadingMessage);
+
+            inventoryData.forEach((item, index) => {
+                setTimeout(() => {
+                    document.getElementById('currentItem').textContent = `Procesando: ${item.codigo}`;
+                    
+                    loadPhotoForItem(item, baseUrl, rlkey, (success) => {
+                        loadedCount++;
+                        if (success) successCount++;
+                        
+                        const progress = Math.round((loadedCount / totalCount) * 100);
+                        document.getElementById('photoProgress').textContent = loadedCount;
+                        document.getElementById('photoSuccess').textContent = successCount;
+                        document.getElementById('progressBar').style.width = progress + '%';
+                        
+                        if (loadedCount === totalCount) {
+                            setTimeout(() => {
+                                document.body.removeChild(loadingMessage);
+                                renderView();
+                                updateStats();
+                                debugLog(`✅ Proceso completado! Fotos cargadas: ${successCount}/${totalCount}`);
+                                alert(`✅ Proceso completado!\n\nFotos encontradas y cargadas: ${successCount}/${totalCount}`);
+                            }, 500);
+                        }
+                    });
+                }, index * 300); // Aumentar delay para evitar saturación
+            });
+        }
+
+        function loadPhotoForItem(item, baseUrl, rlkey, callback) {
+            // Verificar cache primero
+            const cacheKey = `${item.codigo}_${baseUrl}_${rlkey}`;
+            if (imageCache[cacheKey]) {
+                debugLog(`💾 ${item.codigo}: Cargado desde cache`);
+                item.imageData = imageCache[cacheKey];
+                callback(true);
+                return;
+            }
+
+            // Intentar diferentes extensiones de imagen
+            const extensions = ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'JPG', 'JPEG', 'PNG'];
+            let extensionIndex = 0;
+            let attempts = 0;
+            const maxAttempts = 3;
+
+            function tryNextExtension() {
+                if (extensionIndex >= extensions.length) {
+                    debugLog(`❌ ${item.codigo}: No se encontró imagen en ningún formato después de ${attempts} intentos`);
+                    callback(false);
+                    return;
+                }
+
+                const extension = extensions[extensionIndex];
+                attempts++;
+
+                // Estrategia múltiple para URLs de Dropbox
+                const urls = [];
+                
+                if (rlkey) {
+                    // Múltiples formatos para el nuevo sistema de Dropbox
+                    urls.push(`${baseUrl}${item.codigo}.${extension}?rlkey=${rlkey}&raw=1`);
+                    urls.push(`${baseUrl}${item.codigo}.${extension}?rlkey=${rlkey}&dl=1`);
+                    urls.push(`https://dl.dropboxusercontent.com/scl/fi/${baseUrl.split('/')[5]}/${item.codigo}.${extension}?rlkey=${rlkey}&dl=0`);
+                } else {
+                    // Formato antiguo
+                    urls.push(`${baseUrl}${item.codigo}.${extension}?raw=1`);
+                    urls.push(`${baseUrl}${item.codigo}.${extension}?dl=1`);
+                }
+
+                tryUrls(urls, 0);
+            }
+
+            function tryUrls(urls, urlIndex) {
+                if (urlIndex >= urls.length) {
+                    extensionIndex++;
+                    tryNextExtension();
+                    return;
+                }
+
+                const imageUrl = urls[urlIndex];
+                debugLog(`🔍 Intento ${attempts}: ${imageUrl}`);
+
+                // Método 1: Intentar con Image()
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                let loaded = false;
+                
+                img.onload = function() {
+                    if (loaded) return;
+                    loaded = true;
+                    
+                    debugLog(`✅ ${item.codigo}.${extensions[extensionIndex]}: Imagen cargada exitosamente (${img.width}x${img.height})`);
+                    
+                    try {
+                        // Convertir imagen a base64
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Redimensionar si es muy grande
+                        const maxSize = 800;
+                        let { width, height } = img;
+                        
+                        if (width > maxSize || height > maxSize) {
+                            const ratio = Math.min(maxSize / width, maxSize / height);
+                            width *= ratio;
+                            height *= ratio;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                        item.imageData = imageData;
+                        
+                        // Guardar en cache
+                        imageCache[cacheKey] = imageData;
+                        
+                        callback(true);
+                    } catch (e) {
+                        debugLog(`❌ ${item.codigo}: Error al convertir imagen - ${e.message}`);
+                        tryUrls(urls, urlIndex + 1);
+                    }
+                };
+                
+                img.onerror = function(e) {
+                    if (loaded) return;
+                    loaded = true;
+                    
+                    debugLog(`❌ ${item.codigo}.${extensions[extensionIndex]}: Error al cargar imagen (${e.type})`);
+                    
+                    // Intentar método alternativo con fetch
+                    tryFetchMethod(imageUrl, () => {
+                        tryUrls(urls, urlIndex + 1);
+                    });
+                };
+                
+                // Timeout de 8 segundos por URL
+                setTimeout(() => {
+                    if (!loaded) {
+                        loaded = true;
+                        debugLog(`⏰ ${item.codigo}.${extensions[extensionIndex]}: Timeout en URL ${urlIndex + 1}`);
+                        tryUrls(urls, urlIndex + 1);
+                    }
+                }, 8000);
+                
+                img.src = imageUrl;
+            }
+
+            function tryFetchMethod(url, fallback) {
+                debugLog(`🔄 ${item.codigo}: Intentando método fetch...`);
+                
+                fetch(url, {
+                    mode: 'cors',
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'image/*'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        debugLog(`✅ ${item.codigo}: Cargado con fetch`);
+                        item.imageData = e.target.result;
+                        imageCache[cacheKey] = e.target.result;
+                        callback(true);
+                    };
+                    reader.readAsDataURL(blob);
+                })
+                .catch(error => {
+                    debugLog(`❌ ${item.codigo}: Fetch falló - ${error.message}`);
+                    fallback();
+                });
+            }
+
+            tryNextExtension();
+        }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -634,6 +920,7 @@
             filteredData = [...inventoryData];
             renderView();
             updateStats();
+            debugLog(`📊 CSV cargado: ${inventoryData.length} productos`);
         }
 
         function switchView(view) {
