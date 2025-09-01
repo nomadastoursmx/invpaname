@@ -614,6 +614,7 @@
                 
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="export-btn" onclick="exportProgress()">💾 Exportar Progreso</button>
+                    <button class="export-btn" onclick="shareViaWhatsApp()" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);">📱 Compartir por WhatsApp</button>
                     <button class="export-btn" onclick="downloadTemplate()" style="background: linear-gradient(135deg, #ff7b7b 0%, #ff6b6b 100%);">📄 Descargar Plantilla</button>
                 </div>
             </div>
@@ -690,7 +691,128 @@
         document.getElementById('searchInput').addEventListener('input', handleSearch);
         document.getElementById('sucursalInput').addEventListener('input', function(e) {
             sucursalName = e.target.value;
+            autoSave();
         });
+
+        // Auto-guardado en localStorage
+        function autoSave() {
+            if (inventoryData.length === 0) return;
+            
+            const progressData = {
+                sucursal: sucursalName,
+                inventoryData: inventoryData,
+                lastSaved: new Date().toISOString(),
+                filters: {
+                    currentFilter: currentFilter,
+                    currentView: currentView
+                }
+            };
+            
+            try {
+                localStorage.setItem('inventoryProgress', JSON.stringify(progressData));
+            } catch (error) {
+                console.warn('No se pudo guardar automáticamente:', error);
+            }
+        }
+
+        // Auto-cargar al iniciar
+        function autoLoad() {
+            try {
+                const saved = localStorage.getItem('inventoryProgress');
+                if (saved) {
+                    const progressData = JSON.parse(saved);
+                    if (progressData.inventoryData && progressData.inventoryData.length > 0) {
+                        inventoryData = progressData.inventoryData;
+                        sucursalName = progressData.sucursal || '';
+                        document.getElementById('sucursalInput').value = sucursalName;
+                        
+                        if (progressData.filters) {
+                            currentFilter = progressData.filters.currentFilter || 'all';
+                            currentView = progressData.filters.currentView || 'cards';
+                        }
+                        
+                        filteredData = [...inventoryData];
+                        renderView();
+                        updateStats();
+                        
+                        // Mostrar mensaje de recuperación
+                        const lastSaved = new Date(progressData.lastSaved).toLocaleString();
+                        setTimeout(() => {
+                            const shouldRestore = confirm(
+                                `¿Deseas restaurar tu progreso anterior?\n\n` +
+                                `Sucursal: ${sucursalName}\n` +
+                                `Productos: ${inventoryData.length}\n` +
+                                `Última vez guardado: ${lastSaved}\n\n` +
+                                `Selecciona OK para continuar con tu progreso o Cancelar para empezar nuevo.`
+                            );
+                            
+                            if (!shouldRestore) {
+                                clearAutoSave();
+                                location.reload();
+                            }
+                        }, 1000);
+                    }
+                }
+            } catch (error) {
+                console.warn('Error al cargar progreso automático:', error);
+            }
+        }
+
+        // Limpiar auto-guardado
+        function clearAutoSave() {
+            localStorage.removeItem('inventoryProgress');
+        }
+
+        // Compartir por WhatsApp
+        function shareViaWhatsApp() {
+            if (inventoryData.length === 0) {
+                alert('No hay datos para compartir. Carga un inventario primero.');
+                return;
+            }
+
+            // Generar reporte resumido
+            const total = inventoryData.length;
+            const checked = inventoryData.filter(item => item.checked).length;
+            const withPhotos = inventoryData.filter(item => item.imageData).length;
+            const totalExistencias = inventoryData.reduce((sum, item) => sum + (item.existencias || 0), 0);
+            const totalReal = inventoryData.reduce((sum, item) => sum + (item.real || 0), 0);
+            const diferencia = totalReal - totalExistencias;
+            const progress = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+            // Crear mensaje de WhatsApp
+            const mensaje = `📊 *REPORTE DE INVENTARIO*
+🏪 *Sucursal:* ${sucursalName || 'Sin especificar'}
+📅 *Fecha:* ${new Date().toLocaleDateString()}
+
+📦 *RESUMEN:*
+• Total productos: ${total}
+• Productos verificados: ${checked} (${progress}%)
+• Con fotografías: ${withPhotos}
+
+📈 *CANTIDADES:*
+• Existencias sistema: ${totalExistencias.toLocaleString()}
+• Real encontrado: ${totalReal.toLocaleString()}
+• Diferencia: ${diferencia > 0 ? '+' : ''}${diferencia.toLocaleString()}
+
+${diferencia < 0 ? '⚠️ FALTANTE detectado' : diferencia > 0 ? '✅ SOBRANTE detectado' : '✅ Inventario EXACTO'}
+
+*Inventario realizado con Sistema Digital* 📱`;
+
+            // Abrir WhatsApp con el mensaje
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+            
+            // Mostrar vista previa y confirmación
+            if (confirm(`Se compartirá el siguiente reporte por WhatsApp:\n\n${mensaje}\n\n¿Continuar?`)) {
+                window.open(whatsappUrl, '_blank');
+                
+                // Preguntar si también quiere exportar archivos
+                setTimeout(() => {
+                    if (confirm('¿También quieres generar y compartir los archivos de inventario completos?')) {
+                        exportProgress();
+                    }
+                }, 1000);
+            }
+        }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -929,6 +1051,7 @@
                     item.imageData = e.target.result;
                     renderView();
                     updateStats();
+                    autoSave(); // Guardar automáticamente
                 }
             };
             reader.readAsDataURL(file);
@@ -940,6 +1063,7 @@
                 item.checked = !item.checked;
                 renderView();
                 updateStats();
+                autoSave(); // Guardar automáticamente
             }
         }
 
@@ -947,6 +1071,7 @@
             const item = inventoryData.find(i => i.id === itemId);
             if (item) {
                 item.comentario = comment;
+                autoSave(); // Guardar automáticamente
             }
         }
 
@@ -956,6 +1081,7 @@
                 item.real = parseFloat(value) || 0;
                 renderView();
                 updateStats();
+                autoSave(); // Guardar automáticamente
             }
         }
 
@@ -1163,8 +1289,9 @@ P004,Funda Protectora Universal,ACTIVO,,Generic,0,25,Stock completo`;
             document.body.removeChild(link);
         }
 
-        // Initialize stats
+        // Initialize stats and auto-load previous progress
         updateStats();
+        autoLoad();
     </script>
 </body>
 </html>
