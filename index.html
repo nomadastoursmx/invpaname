@@ -7,13 +7,13 @@
   <style>
     /* ====== ESTILOS ====== */
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:10px}
+    body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;min-height:100vh;padding:10pxbackground-color:#fff;}
     .container{max-width:1400px;margin:0 auto;background:rgba(255,255,255,.95);border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden}
     .header{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);padding:20px;text-align:center;color:#fff}
     .header h1{font-size:2em;margin-bottom:10px;text-shadow:0 2px 10px rgba(0,0,0,.3)}
     .controls{padding:20px;background:rgba(79,172,254,.1);border-bottom:1px solid #e0e0e0}
-    .file-input-container{display:flex;flex-direction:column;gap:15px;margin-bottom:12px}
-    .sucursal-container{display:flex;align-items:center;gap:15px;margin-bottom:12px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+    .file-input-container{display:flex;flex-direction:column;gap:15px;margin-bottom:20px}
+    .sucursal-container{display:flex;align-items:center;gap:15px;margin-bottom:15px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
     .sucursal-label{font-weight:bold;color:#667eea;min-width:120px}
     .sucursal-input{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;transition:.3s}
     .sucursal-input:focus{outline:none;border-color:#4facfe;box-shadow:0 0 0 3px rgba(79,172,254,.1)}
@@ -21,16 +21,25 @@
     .file-input input[type=file]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer}
     .file-input-button{display:block;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:15px;border-radius:12px;text-align:center;font-size:16px;font-weight:bold;transition:.3s;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,.2)}
     .file-input-button:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
-
-    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .gdrive-container{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1);margin-bottom:15px}
+    .gdrive-input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;margin-bottom:10px;transition:.3s}
+    .gdrive-input:focus{outline:none;border-color:#4facfe;box-shadow:0 0 0 3px rgba(79,172,254,.1)}
+    .load-gdrive-btn{background:linear-gradient(135deg,#0f9d58 0%,#0b8043 100%);color:#fff;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:.3s}
+    .load-gdrive-btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(11,128,67,.3)}
+    .search-container{position:relative;margin-bottom:15px}
+    .search-input{width:100%;padding:15px;border:2px solid #e0e0e0;border-radius:12px;font-size:16px;transition:.3s;background:#fff}
+    .search-row{display:flex;gap:10px;align-items:center;margin:10px 20px}
+    .clear-search-btn{background:linear-gradient(135deg,#ff6b6b 0%,#ff5252 100%);color:#fff;padding:12px 16px;border:none;border-radius:12px;cursor:pointer;font-weight:bold;transition:.3s}
+    .clear-search-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,82,82,.3)}
+    .search-input:focus{outline:none;border-color:#4facfe;box-shadow:0 0 0 3px rgba(79,172,254,.1)}
+    .filters{display:flex;gap:10px;flex-wrap:wrap}
     .filter-btn{padding:10px 20px;border:2px solid #667eea;background:#fff;color:#667eea;border-radius:25px;cursor:pointer;transition:.3s;font-weight:bold}
     .filter-btn.active{background:#667eea;color:#fff}
-    .view-toggle{display:flex;gap:10px;margin:12px 0 6px}
+    .view-toggle{display:flex;gap:10px;margin-bottom:15px}
     .view-btn,.filter-toggle-btn{padding:10px 20px;border:2px solid #4facfe;background:#fff;color:#4facfe;border-radius:12px;cursor:pointer;transition:.3s;font-weight:bold}
     .view-btn.active,.filter-toggle-btn.active{background:#4facfe;color:#fff}
     .filter-toggle-btn{border-color:#667eea;color:#667eea}
     .filter-toggle-btn.active{background:#667eea;color:#fff}
-
     .advanced-search{display:none;background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1);margin-top:10px;border:2px solid #667eea}
     .advanced-search.active{display:block}
     .adv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:10px}
@@ -40,37 +49,23 @@
     .input:focus,.select:focus{outline:none;border-color:#667eea}
     .clear-filters-btn{background:#ff6b6b;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;transition:.3s}
     .clear-filters-btn:hover{background:#ff5252}
-
     .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;padding:20px;background:rgba(0,242,254,.05)}
     .stat-card{background:#fff;padding:20px;border-radius:15px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,.1);border-left:5px solid #4facfe}
     .stat-number{font-size:2em;font-weight:bold;color:#667eea}
     .stat-label{color:#666;font-weight:500;margin-top:5px}
     .difference-negative{color:#f44336!important}
     .difference-positive{color:#4caf50!important}
-
-    /* === NUEVA FRANJA DE BÚSQUEDA (debajo del resumen) === */
-    .search-strip{display:flex;gap:10px;align-items:center;padding:12px 20px;background:rgba(79,172,254,.08);border-top:1px solid #e9eef5;border-bottom:1px solid #e9eef5}
-    .search-input-wrap{position:relative;flex:1}
-    .search-input{width:100%;padding:14px 44px 14px 14px;border:2px solid #e0e0e0;border-radius:12px;font-size:16px;background:#fff;transition:.2s}
-    .search-input:focus{outline:none;border-color:#4facfe;box-shadow:0 0 0 3px rgba(79,172,254,.1)}
-    .clear-search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:#f1f5ff;border:1px solid #cfe0ff;border-radius:8px;padding:6px 10px;font-weight:600;color:#4f7cff;cursor:pointer}
-    .clear-search-btn:hover{background:#e6efff}
-    .clear-all-btn{padding:10px 16px;border:2px dashed #9aa7ff;color:#4f5bd5;background:#fff;border-radius:12px;font-weight:700;cursor:pointer}
-    .clear-all-btn:hover{background:#f2f4ff}
-
     .inventory-table{width:100%;border-collapse:collapse;margin:20px 0}
     .inventory-table th{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:15px 8px;text-align:left;font-weight:bold;position:sticky;top:0;z-index:10}
     .inventory-table td{padding:12px 8px;border-bottom:1px solid #e0e0e0;vertical-align:top}
     .inventory-table tr:hover{background:rgba(79,172,254,.05)}
     .inventory-table tr.checked{background:rgba(76,175,80,.1)}
-
     .real-input-container,.numeric-input-container{display:flex;align-items:center;gap:5px;justify-content:center}
     .real-input,.numeric-input{width:60px;padding:8px;border:2px solid #e0e0e0;border-radius:6px;text-align:center;font-weight:bold;font-size:16px}
     .real-input:focus,.numeric-input:focus{outline:none;border-color:#4facfe}
     .quantity-btn{width:30px;height:30px;border:2px solid #4facfe;background:#4facfe;color:#fff;border-radius:50%;cursor:pointer;font-weight:bold;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.2s}
     .quantity-btn:hover{background:#3a8bfe;transform:scale(1.1)}
     .quantity-btn:active{transform:scale(.95)}
-
     .card-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;padding:20px}
     .product-card{background:#fff;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.1);overflow:hidden;transition:.3s;border:3px solid transparent}
     .product-card:hover{transform:translateY(-5px);box-shadow:0 12px 35px rgba(0,0,0,.15)}
@@ -86,7 +81,7 @@
     .photo-upload{position:absolute;bottom:10px;right:10px;background:#4facfe;color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:18px;transition:.3s;box-shadow:0 4px 15px rgba(0,0,0,.2)}
     .photo-upload:hover{transform:scale(1.1);background:#3a8bfe}
     .photo-input{display:none}
-    .card-body{padding:20px}
+    .card-body{padding:20pxbackground-color:#fff;}
     .card-description{font-weight:600;margin-bottom:15px;color:#333;line-height:1.4}
     .card-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
     .detail-item{background:rgba(79,172,254,.1);padding:8px 12px;border-radius:8px;text-align:center}
@@ -114,15 +109,121 @@
       .card-view{grid-template-columns:1fr;padding:10px}
       .product-card{margin:0 5px}
       .inventory-table th,.inventory-table td{padding:8px 4px;font-size:14px}
-      .sucursal-container{flex-direction:column;align-items:stretch}
+      .sucursal-container,.gdrive-container{flex-direction:column;align-items:stretch}
       .sucursal-label{min-width:auto}
       .view-toggle{flex-wrap:wrap}
-      .search-strip{flex-direction:column;align-items:stretch}
-      .clear-all-btn{width:100%}
     }
     .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:.3s;z-index:9999}
     .toast.show{opacity:1}
   </style>
+
+<style id="bg-fix-20250903">
+  html, body { background: #ffffff !important; background-image: none !important; background-color: #ffffff !important; }
+</style>
+
+
+<style id="visual-tune-20250903">
+  /* Mejoras sutiles de UI sin romper funciones */
+  :root { --radius-lg: 16px; --radius-md: 12px; --shadow: 0 8px 24px rgba(0,0,0,.08); }
+  .container { border-radius: var(--radius-lg); box-shadow: var(--shadow); background: #fff; }
+  .controls { background: #fafafa; }
+  .stat-card { border-radius: var(--radius-md); box-shadow: 0 6px 18px rgba(0,0,0,.06); border-left: 5px solid #4facfe; }
+  .search-row { margin: 16px 20px 6px; }
+  .search-input { border-color: #e5e7eb; }
+  .clear-search-btn { border-radius: var(--radius-md); }
+  .inventory-table { border-radius: var(--radius-md); overflow: hidden; }
+  .inventory-table thead th { position: sticky; top: 0; backdrop-filter: saturate(140%) blur(2px); }
+  .inventory-table tbody tr:nth-child(even) { background: #fafafa; }
+  .inventory-table tbody tr:hover { background: #f3f7ff; }
+  .filter-btn.active { box-shadow: inset 0 0 0 2px rgba(79,172,254,.35); }
+  .card { border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+</style>
+
+
+<style id="frame-and-buttons-20250903">
+  /* ===== Marco fotográfico en el contorno (sin afectar interacción) ===== */
+  :root {
+    --frame-image: url('data:image/svg+xml;utf8,<?xml version='1.0'?>
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='none'>
+  <defs>
+    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0' stop-color='#7ec8e3'/>
+      <stop offset='1' stop-color='#e0f7fa'/>
+    </linearGradient>
+    <pattern id='p' width='120' height='120' patternUnits='userSpaceOnUse'>
+      <circle cx='10' cy='10' r='1.2' fill='#6fbcd5' opacity='0.6'/>
+      <circle cx='60' cy='40' r='1.2' fill='#6fbcd5' opacity='0.35'/>
+      <circle cx='90' cy='80' r='1.2' fill='#6fbcd5' opacity='0.5'/>
+      <circle cx='30' cy='100' r='1.2' fill='#6fbcd5' opacity='0.4'/>
+      <circle cx='110' cy='20' r='1.2' fill='#6fbcd5' opacity='0.4'/>
+    </pattern>
+    <mask id='m'>
+      <!-- Transparent center, opaque edges to leave only the border visible -->
+      <rect x='0' y='0' width='1200' height='800' fill='white'/>
+      <rect x='60' y='60' width='1080' height='680' rx='24' ry='24' fill='black'/>
+    </mask>
+  </defs>
+  <g mask='url(%23m)'>
+    <rect x='0' y='0' width='1200' height='800' fill='url(%23g)'/>
+    <rect x='0' y='0' width='1200' height='800' fill='url(%23p)' opacity='0.5'/>
+  </g>
+</svg>');
+    --frame-thickness: 64px; /* grosor del marco */
+  }
+  html, body { background: #fff; }
+  body { position: relative; }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: var(--frame-image);
+    background-size: cover;
+    background-position: center;
+    opacity: .35;
+    /* Dejar visible sólo un borde alrededor */
+    -webkit-mask: radial-gradient(closest-side, transparent calc(50% - var(--frame-thickness)), black calc(50% - (var(--frame-thickness) - 1px)));
+            mask: radial-gradient(closest-side, transparent calc(50% - var(--frame-thickness)), black calc(50% - (var(--frame-thickness) - 1px)));
+  }
+  .container { position: relative; z-index: 1; background: #fff; }
+
+  /* ===== Barra de botones armonizada ===== */
+  .button-bar {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    padding: 12px 14px; margin: 8px 0 4px;
+    background: #ffffff;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.06);
+  }
+  .button-bar .export-btn,
+  .button-bar .view-btn,
+  .button-bar .filter-btn,
+  .button-bar button {
+    min-height: 40px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    letter-spacing: .2px;
+    display: inline-flex; align-items:center; gap: 8px;
+    transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+  }
+  .button-bar .export-btn { background: linear-gradient(135deg, #ffa726, #ff9800); color: #fff; }
+  .button-bar .export-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,152,0,.25); }
+  .button-bar .view-btn { background: #f5f7fb; color: #374151; border: 1px solid #e5e7eb; }
+  .button-bar .view-btn.active { background: #e8f3ff; border-color: #cfe5ff; box-shadow: inset 0 0 0 2px rgba(79,172,254,.25); }
+  .button-bar .view-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,.06); }
+
+  /* Botones de filtro armonizados si existen */
+  .filter-btn { background: #f5f7fb; color: #374151; border: 1px solid #e5e7eb; padding: 8px 12px; border-radius: 12px; }
+  .filter-btn.active { background: #e8f3ff; border-color: #cfe5ff; box-shadow: inset 0 0 0 2px rgba(79,172,254,.25); }
+
+  /* Botón limpiar búsqueda integrado visualmente */
+  .clear-search-btn { background: linear-gradient(135deg,#ff6b6b,#ff5252); color: #fff; border: none; }
+  .clear-search-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,82,82,.25); }
+</style>
+
 </head>
 <body>
   <div class="container">
@@ -142,8 +243,9 @@
           <input type="file" id="csvFile" accept=".csv" />
           <label for="csvFile" class="file-input-button">📁 Cargar archivo CSV local</label>
         </div>
+        </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div class="button-bar">
           <button class="export-btn" onclick="exportCSV()" style="background:linear-gradient(135deg,#ffa000 0%,#ff8f00 100%);">🟧 Exportar CSV</button>
           <button class="export-btn" onclick="shareViaWhatsApp()" style="background:linear-gradient(135deg,#25d366 0%,#128c7e 100%);">📱 Compartir por WhatsApp</button>
           <button class="export-btn" onclick="downloadTemplate()" style="background:linear-gradient(135deg,#ff7b7b 0%,#ff6b6b 100%);">📄 Descargar Plantilla</button>
@@ -156,16 +258,6 @@
         <button class="view-btn" onclick="switchView('table', this)">📊 Vista Tabla</button>
         <button class="filter-toggle-btn" onclick="toggleAdvancedSearch(this)">🔍 Filtros Avanzados</button>
       </div>
-
-      <!-- Filtros rápidos por estado de revisión/fotos -->
-      <div class="filters">
-        <button class="filter-btn active" onclick="filterItems('all', this)">Todos</button>
-        <button class="filter-btn" onclick="filterItems('checked', this)">Verificados</button>
-        <button class="filter-btn" onclick="filterItems('unchecked', this)">Pendientes</button>
-        <button class="filter-btn" onclick="filterItems('with-photos', this)">Con Fotos</button>
-        <button class="filter-btn" onclick="filterItems('with-comments', this)">Con Comentarios</button>
-      </div>
-
       <!-- ====== FILTROS AVANZADOS (SELECCIONA COLUMNA) ====== -->
       <div class="advanced-search" id="advancedSearch">
         <div class="adv-grid">
@@ -214,6 +306,14 @@
           <span style="font-size:.8em;color:#666;">Se aplica automáticamente</span>
         </div>
       </div>
+
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterItems('all', this)">Todos</button>
+        <button class="filter-btn" onclick="filterItems('checked', this)">Verificados</button>
+        <button class="filter-btn" onclick="filterItems('unchecked', this)">Pendientes</button>
+        <button class="filter-btn" onclick="filterItems('with-photos', this)">Con Fotos</button>
+        <button class="filter-btn" onclick="filterItems('with-comments', this)">Con Comentarios</button>
+      </div>
     </div>
 
     <div class="stats">
@@ -226,13 +326,10 @@
       <div class="stat-card"><div class="stat-number" id="progressPercent">0%</div><div class="stat-label">Progreso</div></div>
     </div>
 
-    <!-- === NUEVA BARRA DE BÚSQUEDA (debajo del resumen) === -->
-    <div class="search-strip">
-      <div class="search-input-wrap">
-        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar por código o descripción..." />
-        <button class="clear-search-btn" title="Borrar búsqueda" onclick="clearSearch()">✖</button>
-      </div>
-      <button class="clear-all-btn" onclick="clearAllFilters()">🧹 Limpiar filtros</button>
+    <!-- ====== BÚSQUEDA (movida debajo del resumen) ====== -->
+    <div class="search-container search-row">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar por código o descripción..." />
+      <button class="clear-search-btn" onclick="clearSearch()">🧹 Limpiar búsqueda</button>
     </div>
 
     <div id="inventoryContainer">
@@ -248,6 +345,9 @@
   </div>
 
   <div id="toast" class="toast"></div>
+
+  <!-- SheetJS para exportar/leer Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
     /* ===================== ESTADO ===================== */
@@ -270,28 +370,22 @@
     $('sucursalInput').addEventListener('input', e => { sucursalName=e.target.value; autoSave(); });
 
     // Advanced filter UI
-    document.addEventListener('DOMContentLoaded', () => {
-      const fs=$('fieldSelect'); const os=$('operatorSelect');
-      if(fs){ fs.addEventListener('change', onFieldChanged); }
-      if(os){ os.addEventListener('change', applyAdvancedFilters); }
-      const v2=$('valueInput2'); const ci=$('caseInsensitive');
-      if(v2) v2.addEventListener('input', debounce(applyAdvancedFilters,150));
-      if(ci) ci.addEventListener('change', applyAdvancedFilters);
-      attachValue1Listener();
-    });
-
+    $('fieldSelect').addEventListener('change', onFieldChanged);
+    $('operatorSelect').addEventListener('change', applyAdvancedFilters);
     // valueInput1 puede ser input o select (boolean)
-    function attachValue1Listener(){
+    const attachValue1Listener = () => {
       const el = $('valueInput1');
       if (!el) return;
       el.removeEventListener('input', applyAdvancedFilters);
       el.removeEventListener('change', applyAdvancedFilters);
-      if (el.tagName && el.tagName.toLowerCase() === 'select') {
+      if (el.tagName.toLowerCase() === 'select') {
         el.addEventListener('change', applyAdvancedFilters);
       } else {
         el.addEventListener('input', debounce(applyAdvancedFilters, 150));
       }
-    }
+    };
+    $('valueInput2').addEventListener('input', debounce(applyAdvancedFilters, 150));
+    $('caseInsensitive').addEventListener('change', applyAdvancedFilters);
 
     /* ===================== LOCALSTORAGE ===================== */
     function autoSave(){
@@ -318,10 +412,10 @@
     function resetProgress(){
       if(!confirm('Esto borrará el progreso guardado (no tus archivos). ¿Continuar?')) return;
       try{ localStorage.removeItem(LS_KEY); }catch{}
-      inventoryData=[]; filteredData=[]; renderView(); updateStats(); clearAdvancedFilters(); clearSearch(); showToast('Progreso reiniciado');
+      inventoryData=[]; filteredData=[]; renderView(); updateStats(); clearAdvancedFilters(); $('searchInput').value=''; showToast('Progreso reiniciado');
     }
 
-    /* ===================== CSV ===================== */
+    /* ===================== CSV ROBUSTO ===================== */
     function detectDelimiter(headerLine){ const c=(headerLine.match(/,/g)||[]).length; const s=(headerLine.match(/;/g)||[]).length; return s>c?';':','; }
     function splitCSVRow(row,delim){
       const out=[]; let cur=''; let inQ=false;
@@ -424,8 +518,8 @@
                   </div>
                   <div class="detail-item">
                     <div class="detail-label">Diferencia</div>
-                    <div class="detail-value ${getDifferenceClass(item.real - item.existencias)}">
-                      ${(item.real - item.existencias)>0?'+':''}${item.real - item.existencias}
+                    <div class="detail-value ${getDifferenceClass(item.real-item.existencias)}">
+                      ${(item.real-item.existencias)>0?'+':''}${item.real-item.existencias}
                     </div>
                   </div>
                 </div>
@@ -478,7 +572,7 @@
                       <button class="quantity-btn" onclick="adjustQuantity(${item.id}, 1)">+</button>
                     </div>
                   </td>
-                  <td><strong class="${getDifferenceClass(item.real - item.existencias)}">${(item.real - item.existencias)>0?'+':''}${item.real - item.existencias}</strong></td>
+                  <td><strong class="${getDifferenceClass(item.real-item.existencias)}">${(item.real-item.existencias)>0?'+':''}${item.real-item.existencias}</strong></td>
                   <td><textarea class="comment-input" placeholder="Agregar comentario..." onchange="updateComment(${item.id}, this.value)" rows="2">${escapeHtml(item.comentario)}</textarea></td>
                 </tr>
               `).join('')}
@@ -491,7 +585,7 @@
     function getDifferenceClass(d){ if(d<0) return 'difference-negative'; if(d>0) return 'difference-positive'; return ''; }
 
     function uploadPhoto(itemId){
-      const input=document.getElementById(\`photo-\${itemId}\`)||document.getElementById(\`photo-table-\${itemId}\`);
+      const input=document.getElementById(`photo-${itemId}`)||document.getElementById(`photo-table-${itemId}`);
       if(input) input.click();
     }
     function handlePhotoUpload(itemId,ev){
@@ -530,12 +624,14 @@
       const v2 = $('valueInput2');
       const col2 = $('valueCol2'); const caseCol = $('caseCol');
 
+      // Si antes era boolean (select) y ahora no, volver a input
       if (v1 && v1.tagName.toLowerCase() !== 'input') {
         const newInput = document.createElement('input');
         newInput.id='valueInput1'; newInput.className='input'; newInput.placeholder='Valor';
         v1.replaceWith(newInput);
       }
 
+      // refrescar referencias y limpiar
       v1 = $('valueInput1'); v1.value='';
       v2.value='';
       opSel.innerHTML=''; col2.style.display='none'; caseCol.style.display='none';
@@ -580,10 +676,13 @@
     }
 
     function matchesAdvanced(it){
-      const field = $('fieldSelect').value; if (!field) return true;
+      const field = $('fieldSelect').value;
+      if (!field) return true;
+
       const op = $('operatorSelect').value || '';
       const caseInsensitive = $('caseInsensitive').checked;
-      const v1el = $('valueInput1'); const v2el = $('valueInput2');
+      const v1el = $('valueInput1'); // input o select
+      const v2el = $('valueInput2');
 
       let value1 = v1el ? v1el.value : '';
       let value2 = v2el ? v2el.value : '';
@@ -600,6 +699,7 @@
         const b = (value1 || '').toString();
         const A = caseInsensitive ? a.toLowerCase() : a;
         const B = caseInsensitive ? b.toLowerCase() : b;
+
         switch (op) {
           case 'contiene': return A.includes(B);
           case 'no_contiene': return !A.includes(B);
@@ -642,9 +742,9 @@
     function applyAdvancedFilters(){ handleSearch(); }
 
     function clearAdvancedFilters(){
-      const fs=$('fieldSelect'); const os=$('operatorSelect');
-      if(fs) fs.value='';
-      if(os) os.innerHTML='';
+      $('fieldSelect').value='';
+      $('operatorSelect').innerHTML='';
+      // asegurar que valueInput1 es input (por si era select bool)
       const current = $('valueInput1');
       if (current && current.tagName.toLowerCase() !== 'input') {
         const newInput = document.createElement('input');
@@ -661,17 +761,26 @@
       applyAdvancedFilters();
     }
 
-    function clearSearch(){ const si=$('searchInput'); if(si){ si.value=''; handleSearch(); si.focus(); } }
-    function clearAllFilters(){
-      clearSearch();
+
+    /* ===================== LIMPIAR BÚSQUEDA ===================== */
+    function clearSearch(){
+      // Vaciar búsqueda
+      const s = $('searchInput'); if (s) s.value='';
+      // Reset filtros avanzados
       clearAdvancedFilters();
-      currentFilter='all';
-      document.querySelectorAll('.filter-btn').forEach((b,i)=>{ b.classList.toggle('active', i===0); });
-      handleSearch();
-      showToast('Filtros limpiados');
+      // Reset filtro rápido (Todos)
+      currentFilter = 'all';
+      document.querySelectorAll('.filter-btn').forEach((b, i) => {
+        if (i === 0) b.classList.add('active'); else b.classList.remove('active');
+      });
+      // Restaurar datos filtrados y renderizar
+      filteredData = [...inventoryData];
+      renderView();
+      showToast('Búsqueda y filtros limpiados ✅');
     }
 
     /* ===================== STATS ===================== */
+
     function updateStats(){
       const total=inventoryData.length;
       const checked=inventoryData.filter(i=>i.checked).length;
@@ -693,6 +802,28 @@
     }
 
     /* ===================== EXPORTAR ===================== */
+    function exportExcel(){
+      if(!inventoryData.length) return alert('No hay datos para exportar');
+      try{
+        if(typeof XLSX==='undefined') throw new Error('Librería XLSX no cargada');
+        const fecha=new Date().toISOString().split('T')[0];
+        const suc=sucursalName?`_${sucursalName.replace(/[^a-zA-Z0-9]/g,'_')}`:'';
+        const data=inventoryData.map(it=>({
+          SUCURSAL:sucursalName||'Sin especificar',
+          CODIGO:it.codigo, DESCRIPCION:it.descripcion, ESTADO:it.estado,
+          ARCHIVO_FOTO: it.imageData?`${it.codigo}.jpg`:'',
+          REAL:it.real, EXISTENCIAS:it.existencias, DIFERENCIA:it.real-it.existencias,
+          COMENTARIO:it.comentario, VERIFICADO:it.checked?'SI':'NO', TIENE_FOTO:it.imageData?'SI':'NO'
+        }));
+        const ws=XLSX.utils.json_to_sheet(data);
+        const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Inventario');
+        XLSX.writeFile(wb,`inventario_progreso${suc}_${fecha}.xlsx`);
+        const photos=inventoryData.filter(i=>i.imageData);
+        if(photos.length){ let c=0; photos.forEach((p,idx)=>setTimeout(()=>{ downloadImageFile(p.imageData,`${p.codigo}.jpg`); if(++c===photos.length) showToast('Excel y fotos exportados ✅',2000); }, idx*120)); }
+        else showToast('Excel exportado ✅',1600);
+      }catch(e){ console.warn('Fallo Excel, usando CSV:',e); exportCSV(); }
+    }
+
     function exportCSV(){
       if(!inventoryData.length) return alert('No hay datos para exportar');
       const fecha=new Date().toISOString().split('T')[0];
@@ -760,18 +891,18 @@ ${diferencia<0?'⚠️ FALTANTE detectado':diferencia>0?'✅ SOBRANTE detectado'
 
 *Inventario realizado con Sistema Digital* 📱`;
       const url=`https://wa.me/?text=${encodeURIComponent(msg)}`;
-      if(confirm(\`Se compartirá este reporte por WhatsApp:\n\n\${msg}\n\n¿Continuar?\`)){
+      if(confirm(`Se compartirá este reporte por WhatsApp:\n\n${msg}\n\n¿Continuar?`)){
         window.open(url,'_blank');
-        setTimeout(()=>{ if(confirm('¿También quieres exportar los archivos completos (CSV y fotos)?')) exportCSV(); },800);
+        setTimeout(()=>{ if(confirm('¿También quieres exportar los archivos completos (Excel/CSV y fotos)?')) exportExcel(); },800);
       }
     }
 
     /* ===================== INIT ===================== */
     function initAdvancedDefaults(){
-      const os=$('operatorSelect'); if(os) os.innerHTML='';
-      const v2=$('valueCol2'); if(v2) v2.style.display='none';
-      const cc=$('caseCol'); if(cc) cc.style.display='none';
-      const ci=$('caseInsensitive'); if(ci) ci.checked=true;
+      $('operatorSelect').innerHTML='';
+      $('valueCol2').style.display='none';
+      $('caseCol').style.display='none';
+      $('caseInsensitive').checked=true;
       attachValue1Listener();
     }
 
